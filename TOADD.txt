@@ -1,0 +1,4 @@
+Use Diffie-Helman to share primes for RSA
+Use RSA to share key for AES
+Generate key for AES
+256-bit AES on all data being sent
