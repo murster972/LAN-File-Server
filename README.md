@@ -1,2 +1,2 @@
 # LAN-File-Server
-File server to used on LAN, specifically between my phone and laptop
+File server to be used on my LAN, specifically between my phone and laptop
