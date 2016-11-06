@@ -77,6 +77,7 @@ class Client:
             i = 0
 
             #TOADD: progress bar
+            #TOADD: Posibly change so that instead of segements its a stream of single
             while True:
                 s = self.client.recv(self.segement_size)
                 if set(s) == set(b'\0'):

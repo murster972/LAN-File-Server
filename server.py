@@ -98,7 +98,7 @@ class ClientHandler(FileServer):
                 print("[*] {} - {}".format(self.client_id, cmd))
                 if cmd == "dl":
                     filename = self.client_sock.recv(FileServer.segement_size).decode("utf-8")
-                    file_exists = os.popen('find "./Test Files" -maxdepth 1 -name "{}"'.format(filename)).read()
+                    file_exists = os.popen('find "{}" -maxdepth 1 -name "{}"'.format(FileServer.root_folder, filename)).read()
                     if not file_exists:
                         self.client_sock.send("[-] The following file does not exist: {}".format(filename).encode("utf-8"))
                         continue
@@ -131,7 +131,7 @@ class ClientHandler(FileServer):
             self.client_sock.send(i)
         end = b''.ljust(FileServer.segement_size, b'\0')
         self.client_sock.send(end)
-        print("[*] Client {} has downloaded the following file: {}".format(self.client_id, filename))
+        print("[*] Client {} has downloaded the following file: {}".format(file))
 
     def recieve_file(self):
         pass
@@ -162,6 +162,8 @@ def main():
     else:
         print("[*] The server may not work correctly if not ran as root.")
         try:
+            #Bug: Python 2.x doesnt interp input as string unless quotes are round
+            #     e.g. 2.x interps the input Yes as as var name instead of a string
             opt = input("Would you like to try run the server as root? [y/n]: ")
             if opt == "y" or opt == "Y":
                 #TOADD: allow use to specify server.py location
