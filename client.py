@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 from uuid import getnode as get_mac
 from threading import Thread
+from random import randint
 import socket
 import sys
 import os
 
+
 class Client:
-    'Client used to connect to FileServer'
+    'Client used to connect to FileServery'
     def __init__(self):
         #TOADD: possibly change var name or class name
         #HARDCODED FOR TESTING ONLY
@@ -14,6 +16,11 @@ class Client:
         #server_addr = (input("Server IP: "), int(input("Server Port Number: ")))
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+        #for testing only, user will choose what dir to save to
+        self.SAVETO = "/home/muzza/Documents/programming/python/networking/Test Files received"
+        #android save
+        #self.SAVETO = "sdcard"
 
         try:
             self.client.connect(server_addr)
@@ -40,6 +47,9 @@ class Client:
         try:
             while True:
                 opt = input("command: ").strip()
+                if opt == "cl":
+                    os.system("clear")
+                    continue
                 self.client.send(opt.encode("utf-8"))
                 if opt == "e" or opt == "exit": break
                 if opt == "dl" or opt == "ul":
@@ -63,7 +73,7 @@ class Client:
             print("[*] Client closed.")
             sys.exit(0)
 
-    def send_file(self):
+    def send_file(self, filename):
         pass
 
     def recieve_file(self, filename):
@@ -86,10 +96,26 @@ class Client:
                 i += 1
 
             #TOADD: let client choose dir to download file to
-            f = open("/home/muzza/Documents/programming/python/networking/Test Files received/{}".format(filename), 'wb')
+            #TOADD: check if file exists, if so create same filename with random number on the end
+            f = open("{}/{}".format(self.SAVETO, filename), 'wb')
             for i in segs: f.write(i)
             f.close()
             print("[*] The following file has been download: {}".format(filename))
+
+    def get_segements(self, filename):
+        'splits file into segements'
+        segs = []
+
+        with open("{}".format(filename), 'rb') as f:
+            while True:
+                s = f.read(FileServer.segement_size)
+                if not s: break
+                segs.append(s)
+
+        #add padding to last segment
+        if len(segs[::-1][0]) < FileServer.segement_size:
+            segs[len(segs) - 1] = segs[len(segs) - 1].ljust(FileServer.segement_size)
+        return segs
 
     def watch_server_state(self):
         pass

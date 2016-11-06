@@ -97,8 +97,11 @@ class ClientHandler(FileServer):
                 cmd = self.client_sock.recv(FileServer.segement_size).decode("utf-8")
                 print("[*] {} - {}".format(self.client_id, cmd))
                 if cmd == "dl":
+                    #TOADD: send filesize to client so they can check they have room
                     filename = self.client_sock.recv(FileServer.segement_size).decode("utf-8")
-                    file_exists = os.popen('find "{}" -maxdepth 1 -name "{}"'.format(FileServer.root_folder, filename)).read()
+                    #TOADD: change os.popen() so command filename is checked before input as it could allow command injection
+                    file_exists = os.popen('find "{}" -maxdepth 1 -name "{}" 2>/dev/null'.format(FileServer.root_folder, filename)).read()
+                    #file_exists = 1
                     if not file_exists:
                         self.client_sock.send("[-] The following file does not exist: {}".format(filename).encode("utf-8"))
                         continue
@@ -107,11 +110,13 @@ class ClientHandler(FileServer):
                         self.send_file(filename)
                         continue
                 elif cmd == "ul":
-                    pass
+                    #TOADD: get filesize from client so can check there's enough room
+
+                    continue
                 elif cmd == "ls":
                     reply = os.popen("ls '{}'".format(FileServer.root_folder)).read()
                 elif cmd == "hp" or cmd == "?":
-                    reply = "[*] The following commands are avaible:\n        dl - download file\n        ul - upload file\n        ls - list files\n        hp or ? - show avaible files\n        e or exit - exit\n"
+                    reply = "[*] The following commands are avaible:\n        dl - download file\n        ul - upload file\n        ls - list files\n        cl - clear screen\n        hp or ? - show avaible commands\n        e or exit - exit\n"
                 else:
                     reply = "[-] The following command was not recognised: {}\n    Use the command 'help' or '?' to see avaible commands".format(cmd)
                 self.client_sock.send(reply.encode("utf-8"))
@@ -131,9 +136,9 @@ class ClientHandler(FileServer):
             self.client_sock.send(i)
         end = b''.ljust(FileServer.segement_size, b'\0')
         self.client_sock.send(end)
-        print("[*] Client {} has downloaded the following file: {}".format(file))
+        print("[*] Client {} has downloaded the following file: {}".format(self.client_id, filename))
 
-    def recieve_file(self):
+    def recieve_file(self, filename):
         pass
 
     def watch_server_state(self):
