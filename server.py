@@ -1,4 +1,5 @@
 #!/usr/bin/env/python3
+from FileOperations import FileOperations as FileOps
 from random import randint
 from hashlib import sha1
 from threading import Thread
@@ -107,11 +108,17 @@ class ClientHandler(FileServer):
                         continue
                     else:
                         self.client_sock.send("1".encode("utf-8"))
-                        self.send_file(filename)
+                        FileOps.send_file("{}/{}".format(FileServer.root_folder, filename), self.client_sock, self.segement_size)
+                        print("[+] Client-{} has downloaded the following file: {}".format(self.client_id, filename))
                         continue
                 elif cmd == "ul":
                     #TOADD: get filesize from client so can check there's enough room
-
+                    filename = self.client_sock.recv(FileServer.segement_size).decode("utf-8")
+                    if set(filename) != set(" "):
+                        FileOps.recieve_file("{}/{}".format(FileServer.root_folder, filename), self.client_sock, FileServer.segement_size)
+                        print("[+] Client-{} successfully uploaded the following file: {}".format(self.client_id, filename))
+                    else:
+                        print("[-] Client-{} failed to upload an unkown file".format(self.client_id))
                     continue
                 elif cmd == "ls":
                     reply = os.popen("ls '{}'".format(FileServer.root_folder)).read()
@@ -128,36 +135,8 @@ class ClientHandler(FileServer):
             self.client_sock.close()
             print("[*] Client {} closed".format(self.client_id))
 
-    def send_file(self, filename):
-        print("[*] {} - Sending the following file to this client: {}".format(self.client_id, filename))
-
-        segs = self.get_segements(filename)
-        for i in segs:
-            self.client_sock.send(i)
-        end = b''.ljust(FileServer.segement_size, b'\0')
-        self.client_sock.send(end)
-        print("[*] Client {} has downloaded the following file: {}".format(self.client_id, filename))
-
-    def recieve_file(self, filename):
-        pass
-
     def watch_server_state(self):
         pass
-
-    def get_segements(self, filename):
-        'splits file into segements'
-        segs = []
-
-        with open("{}/{}".format(FileServer.root_folder, filename), 'rb') as f:
-            while True:
-                s = f.read(FileServer.segement_size)
-                if not s: break
-                segs.append(s)
-
-        #add padding to last segment
-        if len(segs[::-1][0]) < FileServer.segement_size:
-            segs[len(segs) - 1] = segs[len(segs) - 1].ljust(FileServer.segement_size)
-        return segs
 
 def main():
     #checks if script is being ran with sudo or by root

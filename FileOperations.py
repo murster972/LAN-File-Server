@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import socket
 import os
 
 """
@@ -8,56 +9,58 @@ TODO: check filename doesnt allow client to traverse backwards through directori
 """
 
 class FileOperations:
-    '''Mehtods for file operations used by the client and server'''
-    def __init__(self, sock, segement_size):
-        ''':param sock: sock used to send/recieve a file
-           :param segement_size: size of segements in Bytes'''
-        self.sock = sock
-        self.segement_size = segement_size
-
-    def send_file(self, filename):
+    '''Methods used for file operations, used by the client and server'''
+    def send_file(filename, sock, segement_size):
         '''sends file using socket
-           :param filename: name of file being sent'''
-        pass
+           :param filename: name of file being sent
+           :param sock: sock used to send a file
+           :param segement_size: size of segements in Bytes'''
+        segs = FileOperations.segement_file(filename, segement_size)
 
-    def recieve_file(self, filename):
+        for i in segs:
+            sock.send(i)
+        sock.send(b'\0'.ljust(segement_size, b'\0'))
+
+    def recieve_file(filename, sock, segement_size):
         ''' recieves segements of a file through socket,
             then reassembles segements and writes data to file
-            :param filename: name of file being uploaded'''
-        pass
+            :param filename: name of file being uploaded
+            :param sock: sock used to recieve a file
+            :param segement_size: size of segements in Bytes'''
+        segs = []
 
-    def segement_file(self, filename):
+        while True:
+            s = sock.recv(segement_size)
+            if set(s) == set(b'\0'): break
+            segs.append(s)
+
+        #TOADD: ask user if they want to overwrite of file already exists
+        f = open(filename, "wb")
+        for i in segs: f.write(i)
+        f.close()
+
+    def segement_file(filename, segement_size):
         '''Segements a file into bytes of size segement_size'''
         segs = []
 
         with open("{}".format(filename), 'rb') as f:
             while True:
-                s = f.read(self.segement_size)
+                s = f.read(segement_size)
                 if not s: break
                 segs.append(s)
 
-        segs[len(segs) - 1] = segs[len(segs) - 1].ljust(self.segement_size)
+        segs[len(segs) - 1] = segs[len(segs) - 1].ljust(segement_size)
         return segs
 
-    def avaiable_files(self, dirname):
+    def avaiable_files(dirname):
         '''returns the files at the directory passed as an arg
            :param dirname: directory to search'''
         return os.popen('ls "{}" 2>/dev/null'.format(dirname)).read()
 
-    def file_exists(self, filename):
+    def file_exists(filename):
         '''returns True if file exists else False
            :param filename: file to check'''
         return os.system('ls "{}" 2>/dev/null'.format(filename)) == 0
 
-#checking inheritance will work for client and server classes
-class testClass(FileOperations):
-    def __init__(self):
-        self.server_sock = "test"
-        self.segement_size = 2048
-        super().__init__(self.server_sock, self.segement_size)
-
 if __name__ == '__main__':
-    f = testClass()
-    print(f.sock)
-    print(f.segement_size)
-    print(f.avaiable_files("."))
+    s = testServer()

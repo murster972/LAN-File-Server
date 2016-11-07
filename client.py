@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from FileOperations import FileOperations as FileOps
 from uuid import getnode as get_mac
 from threading import Thread
 from random import randint
@@ -55,10 +56,23 @@ class Client:
                 if opt == "dl" or opt == "ul":
                     filename = input("File to {}: ".format(opt))
                 if opt == "dl":
-                    self.recieve_file(filename)
-                    print("test")
+                    self.client.send(filename.encode("utf-8"))
+                    file_exists = self.client.recv(self.segement_size).decode("utf-8")
+                    if file_exists == "1":
+                        FileOps.recieve_file(filename, self.client, self.segement_size)
+                        print("[+] File downloaded successfully")
+                    else:
+                        print(file_exists)
+                    continue
                 elif opt == "ul":
-                    pass
+                    if FileOps.file_exists(filename):
+                        self.client.send(filename.encode("utf-8"))
+                        FileOps.send_file(filename, self.client, self.segement_size)
+                        print("[+] File uploaded successfully")
+                    else:
+                        self.client.send(" ".encode("utf-8"))
+                        print("[-] Unable to upload as the file could not be found: {}".format(filename))
+                    #self.client.send(filename.encode("utf-8"))
                 else:
                     reply = self.client.recv(self.segement_size).decode("utf-8")
                     print(reply)
@@ -72,53 +86,6 @@ class Client:
             self.client.close()
             print("[*] Client closed.")
             sys.exit(0)
-
-    def send_file(self, filename):
-        pass
-
-    def recieve_file(self, filename):
-        self.client.send(filename.encode("utf-8"))
-        file_exists = self.client.recv(self.segement_size).decode("utf-8")
-
-        if file_exists[0] != "1":
-            print("test" + file_exists)
-        else:
-            segs = []
-            i = 0
-
-            #TOADD: progress bar
-            #TOADD: Posibly change so that instead of segements its a stream of single
-            while True:
-                s = self.client.recv(self.segement_size)
-                if set(s) == set(b'\0'):
-                    break
-                segs.append(s)
-                i += 1
-
-            #TOADD: let client choose dir to download file to
-            #TOADD: check if file exists, if so create same filename with random number on the end
-            f = open("{}/{}".format(self.SAVETO, filename), 'wb')
-            for i in segs: f.write(i)
-            f.close()
-            print("[*] The following file has been download: {}".format(filename))
-
-    def get_segements(self, filename):
-        'splits file into segements'
-        segs = []
-
-        with open("{}".format(filename), 'rb') as f:
-            while True:
-                s = f.read(FileServer.segement_size)
-                if not s: break
-                segs.append(s)
-
-        #add padding to last segment
-        if len(segs[::-1][0]) < FileServer.segement_size:
-            segs[len(segs) - 1] = segs[len(segs) - 1].ljust(FileServer.segement_size)
-        return segs
-
-    def watch_server_state(self):
-        pass
 
 if __name__ == '__main__':
     os.system("clear")
