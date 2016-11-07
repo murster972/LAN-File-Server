@@ -54,8 +54,11 @@ class Client:
                 self.client.send(opt.encode("utf-8"))
                 if opt == "e" or opt == "exit": break
                 if opt == "dl" or opt == "ul":
-                    filename = input("File to {}: ".format(opt))
+                    filename = input("File to {}, leave blank to skip: ".format(opt)).strip()
                 if opt == "dl":
+                    if not filename:
+                        self.client.send(" ".encode("utf-8"))
+                        continue
                     self.client.send(filename.encode("utf-8"))
                     file_exists = self.client.recv(self.segement_size).decode("utf-8")
                     if file_exists == "1":
@@ -65,6 +68,9 @@ class Client:
                         print(file_exists)
                     continue
                 elif opt == "ul":
+                    if not filename:
+                        self.client.send(" ".encode("utf-8"))
+                        continue
                     if FileOps.file_exists(filename):
                         self.client.send(filename.encode("utf-8"))
                         FileOps.send_file(filename, self.client, self.segement_size)

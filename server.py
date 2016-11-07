@@ -100,6 +100,8 @@ class ClientHandler(FileServer):
                 if cmd == "dl":
                     #TOADD: send filesize to client so they can check they have room
                     filename = self.client_sock.recv(FileServer.segement_size).decode("utf-8")
+                    if filename == " ":
+                        continue
                     #TOADD: change os.popen() so command filename is checked before input as it could allow command injection
                     file_exists = os.popen('find "{}" -maxdepth 1 -name "{}" 2>/dev/null'.format(FileServer.root_folder, filename)).read()
                     #file_exists = 1
