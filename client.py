@@ -59,7 +59,7 @@ class Client:
                     self.client.send(filename.encode("utf-8"))
                     file_exists = self.client.recv(self.segement_size).decode("utf-8")
                     if file_exists == "1":
-                        FileOps.recieve_file(filename, self.client, self.segement_size)
+                        FileOps.recieve_file("{}/{}".format(self.SAVETO, filename), self.client, self.segement_size)
                         print("[+] File downloaded successfully")
                     else:
                         print(file_exists)
