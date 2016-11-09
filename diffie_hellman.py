@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-from hashlib import sha3
+import secrets
+import hashlib
 import os
 
 class DiffieHellman:
@@ -7,9 +8,12 @@ class DiffieHellman:
         #sock - socket to send and recv over
         pass
 
+    def _get_prime(self):
+        pass
+
 
 def main():
-    pass
+    print(secrets.randbits(512))
 
 if __name__ == '__main__':
     main()
