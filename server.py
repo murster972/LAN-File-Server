@@ -20,9 +20,16 @@ class FileServer:
     def __init__(self):
         #TOADD: add error checking for server address
         try:
-            #self.server_addr = (input("Server IP: "), int(input("Server Port Number: ")))
+            ip = input("Sever IP: ")
+            port = int(input("Server Port Number: "))
+            
+            if no valid_ip_addr(ip):
+                print("[-] Invalid Ip address")
+                sys.exit(1)
+
+            self.server_addr = (ip, port)
             #HARDCODED FOR TESTING ONLY
-            self.server_addr = ("", 1020)
+            #self.server_addr = ("", 1020)
             self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.server.bind(self.server_addr)
@@ -67,6 +74,22 @@ class FileServer:
             self.server_state = 0
             print("[*] Server closed.")
             self.server.close()
+
+    def valid_ip_addr(self, ip):
+        'checks that the user has entered a valid ip address'
+        quads = ip.split(".")
+
+        try:
+            a = int("".join(quads))
+            if len(quads) == 4:
+                for i in quads:
+                    if int(i) > 255 or int(i) < 0:
+                        return False
+                return True
+            else:
+                return False
+        except ValueError:
+            return False
 
 class ClientHandler(FileServer):
     'Handles all clients connected to server, including client requests and '

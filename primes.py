@@ -40,7 +40,7 @@ def sieve_of_eratosthenes(n):
     assert n >=2 and n <= 2**20
 
     #generate and set flags for all numbers 2 to n to one
-    flags = {x:1 for x in range(3, n + 1, 2) if x % 3 != 0}
+    flags = {x:1 for x in range(3, n + 1, 2)}
     flags[2] = 1
 
     i = 3
@@ -60,7 +60,7 @@ def sieve_of_eratosthenes(n):
     return primes
 
 def is_prime(n):
-    primes = sieve_of_eratosthenes(2**20)
+    primes = sieve_of_eratosthenes(1000)
     for i in primes:
         if n % i == 0:
             return i == n
@@ -82,7 +82,6 @@ def rabin_miller(n):
 
     k = 0
     while k < 128:
-        #TODO: DONT USE PSEUDO-RANDOM NUMBER GENERATOR FOR CRYPTO!!!
         a = secrets.randbelow(n - 3) + 2
         v = pow(a, s, n)
 
@@ -99,6 +98,6 @@ def rabin_miller(n):
 
 if __name__ == "__main__":
     x = time.time()
-    print(generate_large_prime(2**9999, 2**10000))
+    print(generate_large_prime(2**1999, 2**2000))
     print(time.time() - x)
     #print(is_prime())
