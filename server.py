@@ -22,8 +22,8 @@ class FileServer:
         try:
             ip = input("Sever IP: ")
             port = int(input("Server Port Number: "))
-            
-            if no valid_ip_addr(ip):
+
+            if not self.valid_ip_addr(ip):
                 print("[-] Invalid Ip address")
                 sys.exit(1)
 

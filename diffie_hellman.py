@@ -13,6 +13,8 @@ the picks a value x from the multiplicative group mod p
 and client picks value y from the multiplicative group mod p
 server send client g**x and client sends server g**y
 key = (g**x)**y == (g**y)**x
+
+K should be hashed before being used by any other system, e.g. as a key in AES
 """
 class DiffieHellman:
     def __init__(self, sock):
