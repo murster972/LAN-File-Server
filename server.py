@@ -146,7 +146,10 @@ class ClientHandler(FileServer):
                         print("[-] Client-{} failed to upload an unkown file".format(self.client_id))
                     continue
                 elif cmd == "ls":
+                    #BUG: Server hangs if an empty dir is passed with 'ls'
                     reply = os.popen("ls '{}'".format(FileServer.root_folder)).read()
+                    if not reply:
+                        reply = "[-] No Files avaiable for client to download"
                 elif cmd == "hp" or cmd == "?":
                     reply = "[*] The following commands are avaible:\n        dl - download file\n        ul - upload file\n        ls - list files\n        cl - clear screen\n        hp or ? - show avaible commands\n        e or exit - exit\n"
                 else:

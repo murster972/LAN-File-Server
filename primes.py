@@ -16,8 +16,11 @@ generate very large - 1000s of bits - prime numbers
 :param u: upper bound in bits
 :output p: random prime in range l...u
 
-TOFIX: taking between 11s-15s to gen 2*2048 bit prime, find a way
-       reduce the time to.
+NOTE: secrets.getrandbits(N), doesnt always return exactly N-bits, may be slightly off,
+      e.g. 256-bits may return 255 or even 252 bits
+
+      Work around will be to gen prime thats always > 2048 bits despite secrets.getrandbits(N),
+      inaccuracy.
 """
 #TODO: only generate safe primes which satisfy certain condtions,
 #      so that the generator for Diffie Hellman can be secure and
@@ -25,7 +28,11 @@ TOFIX: taking between 11s-15s to gen 2*2048 bit prime, find a way
 
 prime_test_sieve = []
 
-def generate_safe_prime(l, u):
+"""
+Generates a large n-bit prime, wont be exactly n-bits as secrets.randombits(n)
+isn't always exact.
+"""
+def generate_large_prime(n):
     assert l > 1 and l <= u
 
     #generate 256-bit to be used for q
@@ -46,15 +53,11 @@ def generate_safe_prime(l, u):
         #TODO: Figure out how to calc n to get N-bit prime
         #? N-bits: N - 256 - 1
         #n = secrets.randbelow(2**1792 - 2**1791) + 2**1791
-        #n = n = secrets.randbits(1793)
-        n = n = secrets.randbits(1792)
+        n = secrets.randbits(1800)
+        #n = secrets.randbits(3760)
         p = (n * q) + 1
         if is_prime(p): break
-    #return p
-    print(p)
-    print(math.floor(math.log2(p) + 1))
-    print(q)
-    print(math.floor(math.log2(q) + 1))
+    return p
 
 """
 Uses the sieve of eratosthenes to generate a small list of primes, which
@@ -136,5 +139,6 @@ def rabin_miller(n):
 if __name__ == '__main__':
     x = time.time()
     #print(sieve_of_eratosthenes(1000))
-    print(generate_safe_prime(2**2047, 2**2048))
+    p = generate_large_prime(2**2047, 2**2048)
+    print(p)
     print(time.time() - x)
