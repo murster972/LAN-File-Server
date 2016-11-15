@@ -11,17 +11,15 @@ import os
 class Client:
     'Client used to connect to FileServery'
     def __init__(self):
-        #TOADD: possibly change var name or class name
-        #HARDCODED FOR TESTING ONLY
-        server_addr = ("", 1020)
-        #server_addr = (input("Server IP: "), int(input("Server Port Number: ")))
+        server_addr = (input("Server IP: "), int(input("Server Port Number: ")))
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-        #for testing only, user will choose what dir to save to
-        self.SAVETO = "/home/muzza/Documents/programming/python/networking/Test Files received"
-        #android save
-        #self.SAVETO = "sdcard"
+        self.SAVETO = input("Directory to save files to: ")
+
+        if os.system("ls {}".format(self.SAVETO)):
+            print("[-] Directory not found: {}".format(self.SAVETO))
+            sys.exit(1)
 
         try:
             self.client.connect(server_addr)
@@ -37,12 +35,10 @@ class Client:
         #TOADD: establish encryption protocols when connecting to server
         #send mac-address once connections been established
         self.client.send(str(get_mac()).encode("utf-8"))
-        #self.id = self.client.recv(self.segement_size).decode("utf-8")
         welcome_msg = self.client.recv(self.segement_size).decode("utf-8")
         print(welcome_msg)
 
         self.menu()
-        #TOADD: create thread to watch server state
 
     def menu(self):
         try:
@@ -78,7 +74,6 @@ class Client:
                     else:
                         self.client.send(" ".encode("utf-8"))
                         print("[-] Unable to upload as the file could not be found: {}".format(filename))
-                    #self.client.send(filename.encode("utf-8"))
                 else:
                     reply = self.client.recv(self.segement_size).decode("utf-8")
                     print(reply)
@@ -88,7 +83,6 @@ class Client:
         except KeyboardInterrupt:
             pass
         finally:
-            #TOADD: send message to server saying client is closing
             self.client.close()
             print("[*] Client closed.")
             sys.exit(0)

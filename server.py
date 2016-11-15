@@ -13,18 +13,20 @@ class FileServer:
     client_list = {}
     current_operations = {}
     segement_size = 1024
-    #state of server, checked by client handlers, if 1 server is running if 0 server is closeed/closing
-    server_state = 0
-    root_folder = "/home/muzza/Documents/programming/python/networking/Test Files"
+    root_folder = ""
 
     def __init__(self):
-        #TOADD: add error checking for server address
         try:
             ip = input("Sever IP: ")
             port = int(input("Server Port Number: "))
 
             if not self.valid_ip_addr(ip):
                 print("[-] Invalid Ip address")
+                sys.exit(1)
+
+            FileServer.root_folder = input("Server root directory: ")
+            if os.system("ls {}".format(FileServer.root_folder)):
+                print("[-] Root directory not found: {}".format(FileServer.root_folder))
                 sys.exit(1)
 
             self.server_addr = (ip, port)
@@ -163,9 +165,6 @@ class ClientHandler(FileServer):
             self.client_sock.close()
             print("[*] Client {} closed".format(self.client_id))
 
-    def watch_server_state(self):
-        pass
-
 def main():
     #checks if script is being ran with sudo or by root
     if os.getuid() == 0:
@@ -174,11 +173,8 @@ def main():
     else:
         print("[*] The server may not work correctly if not ran as root.")
         try:
-            #Bug: Python 2.x doesnt interp input as string unless quotes are round
-            #     e.g. 2.x interps the input Yes as as var name instead of a string
             opt = input("Would you like to try run the server as root? [y/n]: ")
             if opt == "y" or opt == "Y":
-                #TOADD: allow use to specify server.py location
                 print("[*] Trying to run as root")
                 os.system("sudo python3 server.py")
             else:

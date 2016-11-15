@@ -33,7 +33,7 @@ Generates a large n-bit prime, wont be exactly n-bits as secrets.randombits(n)
 isn't always exact.
 """
 def generate_large_prime(n):
-    assert l > 1 and l <= u
+    #assert l > 1 and l <= u
 
     #generate 256-bit to be used for q
     #p = Nq + 1
@@ -57,7 +57,7 @@ def generate_large_prime(n):
         #n = secrets.randbits(3760)
         p = (n * q) + 1
         if is_prime(p): break
-    return p
+    return (q, n, p)
 
 """
 Uses the sieve of eratosthenes to generate a small list of primes, which
